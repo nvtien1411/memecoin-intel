@@ -128,7 +128,7 @@ export function VerdictHeader({ data }: { data: AnalysisResult }) {
               ? "curve holds supply"
               : eff === null
                 ? "unavailable"
-                : "clusters merged"
+                : "ex-LP/burn, clusters merged"
           }
           tone={
             !data.holders.meaningful || eff === null
@@ -147,9 +147,9 @@ export function VerdictHeader({ data }: { data: AnalysisResult }) {
           }
           sub={
             data.flow.dataAvailable
-              ? `${data.flow.buys} buys / ${data.flow.sells} sells`
+              ? `${fmtUsd(data.flow.buyVolumeUsd)} in / ${fmtUsd(data.flow.sellVolumeUsd)} out`
               : data.flow.note
-                ? `${data.flow.buys} buys / ${data.flow.sells} sells (24h)`
+                ? "from 24h txn counts"
                 : "unavailable"
           }
           tone={

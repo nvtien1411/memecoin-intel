@@ -1,9 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  // The dev-mode floating badge sits on top of the dashboard's left column.
+  devIndicators: false,
   turbopack: {
     rules: {
       "*.css": {
