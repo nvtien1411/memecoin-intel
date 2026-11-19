@@ -58,8 +58,10 @@ export function ClusterMap({ clusters }: { clusters: ClusterAnalysis }) {
       title="Wallet cluster map"
       subtitle={`${clusters.traced}/${clusters.total} wallets traced · ${clusters.unknown} unknown · shared funder = suspected common operator`}
       right={
-        <span className="font-mono text-[12px] text-slate-500">
-          {clusters.groups.length} shared funder{clusters.groups.length === 1 ? "" : "s"}
+        <span className="font-mono text-[10px] text-slate-500">
+          {clusters.groups.length === 0
+            ? "no shared funder"
+            : `${clusters.groups.length} shared funder${clusters.groups.length === 1 ? "" : "s"}`}
         </span>
       }
     >

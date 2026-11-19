@@ -237,6 +237,18 @@ export function clamp(n: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, n));
 }
 
+export function fmtPrice(n: number | null | undefined): string {
+  if (n === null || n === undefined || !Number.isFinite(n)) return "—";
+  if (n === 0) return "$0";
+  const abs = Math.abs(n);
+  if (abs >= 0.01) return `$${n.toFixed(4)}`;
+  if (abs >= 1) return `$${n.toFixed(2)}`;
+  // Sub-cent prices: lead with significant digits, not a wall of zeros.
+  const exp = Math.floor(Math.log10(abs));
+  const mantissa = n / 10 ** exp;
+  return `$${mantissa.toFixed(3)}e${exp}`;
+}
+
 export function fmtUsd(n: number | null | undefined): string {
   if (n === null || n === undefined || !Number.isFinite(n)) return "—";
   const abs = Math.abs(n);
@@ -251,6 +263,22 @@ export function fmtUsd(n: number | null | undefined): string {
 export function fmtPct(n: number | null | undefined, digits = 1): string {
   if (n === null || n === undefined || !Number.isFinite(n)) return "—";
   return `${n >= 0 ? "+" : ""}${n.toFixed(digits)}%`;
+}
+
+export function fmtChange(
+  pct: number | null | undefined,
+  ageHours: number | null | undefined,
+): { text: string; label: string } {
+  if (pct === null || pct === undefined || !Number.isFinite(pct)) {
+    return { text: "—", label: "" };
+  }
+  // A token 21 hours old has no 24h window. DexScreener reports the change since
+  // the first trade, so labelling it "24h" overstates the timeframe.
+  const partial = ageHours !== null && ageHours !== undefined && ageHours < 24;
+  return {
+    text: `${pct >= 0 ? "+" : ""}${pct.toFixed(1)}%`,
+    label: partial ? "since launch" : "24h",
+  };
 }
 
 export function fmtAge(hours: number | null | undefined): string {

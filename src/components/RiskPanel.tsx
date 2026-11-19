@@ -66,11 +66,16 @@ export function RiskPanel({
                 >
                   <SeverityPill severity={r.severity} />
                   <span className="flex-1 text-[13px] text-slate-200">{r.name}</span>
-                  <span className="hidden shrink-0 font-mono text-[12px] text-slate-500 sm:block">
+                  <span className="hidden shrink-0 font-mono text-[10px] uppercase tracking-wide text-slate-500 sm:block">
                     {r.category}
                   </span>
-                  <span className="shrink-0 font-mono text-[12px] text-slate-500">
-                    {isOpen ? "−" : "+"}
+                  <span
+                    aria-hidden
+                    className={`shrink-0 font-mono text-[11px] text-slate-500 transition-transform ${
+                      isOpen ? "rotate-90" : ""
+                    }`}
+                  >
+                    ›
                   </span>
                 </button>
                 {isOpen && (

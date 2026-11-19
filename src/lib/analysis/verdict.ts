@@ -6,7 +6,7 @@ import type {
   AnalysisResult,
   TokenIdentity,
 } from "../types";
-import { fmtAge, fmtPct, fmtUsd } from "../http";
+import { fmtAge, fmtChange, fmtUsd } from "../http";
 
 const WEIGHT: Record<RiskSignal["severity"], number> = {
   critical: 30,
@@ -97,8 +97,9 @@ export function buildTldr(
   const age = fmtAge(market.ageHours);
   const liq = fmtUsd(market.liquidityUsd);
   const mcap = fmtUsd(market.marketCap ?? market.fdv);
+  const ch = fmtChange(market.priceChange.h24, market.ageHours);
   lines.push(
-    `${token.symbol} on ${token.chain} — ${mcap} cap, ${liq} liquidity, ${age} old, ${fmtPct(market.priceChange.h24)} 24h.`,
+    `${token.symbol} on ${token.chain} — ${mcap} cap, ${liq} liquidity, ${age} old, ${ch.text}${ch.label ? ` ${ch.label}` : ""}.`,
   );
 
   const eff = holders.effectiveTop10Pct ?? clusters.effectiveTop10Pct;

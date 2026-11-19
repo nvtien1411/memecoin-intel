@@ -44,13 +44,19 @@ export function DeployerPanel({
           </div>
 
           <div className="flex items-baseline justify-between gap-2">
-            <span className="text-[12px] text-slate-500">Creator holdings</span>
+            <span className="text-[12px] text-slate-400">Creator holdings</span>
             <span
-              className={`font-mono text-[13px] ${
-                (deployer.balancePct ?? 0) > 5 ? "text-amber-300" : "text-slate-200"
+              className={`font-mono text-[12.5px] ${
+                deployer.balancePct === null
+                  ? "text-slate-500"
+                  : deployer.balancePct > 5
+                    ? "text-amber-300"
+                    : "text-slate-200"
               }`}
             >
-              {deployer.balancePct === null ? "—" : `${deployer.balancePct.toFixed(2)}%`}
+              {deployer.balancePct === null
+                ? "unknown"
+                : `${deployer.balancePct.toFixed(2)}%`}
             </span>
           </div>
 

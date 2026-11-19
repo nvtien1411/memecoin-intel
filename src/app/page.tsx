@@ -180,15 +180,15 @@ export default function Home() {
               <VerdictHeader data={data} />
             </div>
 
-            <nav className="sticky top-[92px] z-10 -mx-1 flex gap-1 overflow-x-auto bg-[#07080a]/95 px-1 py-1.5 backdrop-blur">
+            <nav className="sticky top-[104px] z-10 -mx-1 flex gap-1 overflow-x-auto border-b border-[#232a34] bg-[#07080a]/95 px-1 py-2 backdrop-blur">
               {SECTIONS.slice(1).map((s) => (
                 <a
                   key={s.id}
                   href={`#${s.id}`}
-                  className={`shrink-0 rounded px-2 py-1 font-mono text-[11px] uppercase tracking-wide transition ${
+                  className={`shrink-0 rounded px-2.5 py-1 font-mono text-[11px] uppercase tracking-wide transition ${
                     active === s.id
-                      ? "bg-sky-500/15 text-sky-300"
-                      : "text-slate-500 hover:text-slate-300"
+                      ? "bg-sky-500/20 font-semibold text-sky-300 ring-1 ring-inset ring-sky-500/40"
+                      : "text-slate-500 hover:bg-white/5 hover:text-slate-300"
                   }`}
                 >
                   {s.label}

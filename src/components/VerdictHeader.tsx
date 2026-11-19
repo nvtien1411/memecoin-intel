@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { AnalysisResult } from "@/lib/types";
 import { VERDICT_META } from "@/lib/analysis/verdict";
-import { fmtAge, fmtPct, fmtUsd } from "@/lib/http";
+import { fmtAge, fmtChange, fmtPrice, fmtUsd } from "@/lib/http";
 import { Stat } from "./ui";
 
 function short(addr: string, n = 5) {
@@ -29,6 +29,7 @@ function CopyAddr({ address }: { address: string }) {
 export function VerdictHeader({ data }: { data: AnalysisResult }) {
   const meta = VERDICT_META[data.verdict];
   const change = data.market.priceChange.h24 ?? null;
+  const changeInfo = fmtChange(change, data.market.ageHours);
   const eff = data.holders.effectiveTop10Pct;
 
   return (
@@ -94,8 +95,12 @@ export function VerdictHeader({ data }: { data: AnalysisResult }) {
       <div className="grid grid-cols-2 gap-px border border-[#2b333e] bg-[#2b333e] sm:grid-cols-3 lg:grid-cols-6">
         <Stat
           label="Price"
-          value={data.market.priceUsd === null ? "—" : `$${data.market.priceUsd.toPrecision(4)}`}
-          sub={change === null ? "24h —" : `${fmtPct(change)} 24h`}
+          value={fmtPrice(data.market.priceUsd)}
+          sub={
+            change === null
+              ? "no price history"
+              : `${changeInfo.text} ${changeInfo.label}`
+          }
           subTone={change === null ? "default" : change >= 0 ? "up" : "down"}
         />
         <Stat
@@ -136,14 +141,16 @@ export function VerdictHeader({ data }: { data: AnalysisResult }) {
           }
         />
         <Stat
-          label="Net flow"
+          label="Net flow (by volume)"
           value={
             data.flow.imbalance === null ? "—" : `${(data.flow.imbalance * 100).toFixed(0)}%`
           }
           sub={
             data.flow.dataAvailable
               ? `${data.flow.buys} buys / ${data.flow.sells} sells`
-              : "unavailable"
+              : data.flow.note
+                ? `${data.flow.buys} buys / ${data.flow.sells} sells (24h)`
+                : "unavailable"
           }
           tone={
             data.flow.imbalance === null ? "default" : data.flow.imbalance >= 0 ? "up" : "down"
