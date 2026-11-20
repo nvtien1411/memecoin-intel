@@ -24,8 +24,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${mono.variable} h-full`}>
-      <body className="min-h-full bg-[#07080a] text-slate-200 antialiased">
+    // suppressHydrationWarning on <html> and <body> only silences attribute
+    // mismatches on those exact elements. Browser extensions (Bitdefender,
+    // Grammarly, password managers) inject attributes like bis_skin_checked and
+    // __processed_*__ into <body> before React hydrates, which otherwise
+    // surfaces as two "Issues" in the dev overlay on every single page load.
+    // It hides nothing real: child-tree mismatches still report normally.
+    <html
+      lang="en"
+      className={`${inter.variable} ${mono.variable} h-full`}
+      suppressHydrationWarning
+    >
+      <body
+        className="min-h-full bg-[#07080a] text-slate-200 antialiased"
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>

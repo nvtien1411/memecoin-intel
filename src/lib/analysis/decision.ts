@@ -319,12 +319,16 @@ export function buildDecision(input: Input): Decision {
   /* -------------------------------- flow ------------------------------ */
   if (flow.dataAvailable && flow.imbalance !== null) {
     const imb = flow.imbalance;
+    // Flow is a snapshot of the last few hundred trades, so it flips sign
+    // between two page loads on the same token. It can inform the call but it
+    // must never be able to produce a disqualifier on its own — otherwise the
+    // verdict changes with the clock, which is worse than useless.
     gates.push(
       gate(
         "flow",
         "Buy vs sell pressure",
-        imb > 0.2 ? "pass" : imb > -0.2 ? "caution" : "fail",
-        `Net ${(imb * 100).toFixed(0)}% by volume over ${flow.windowTrades} trades`,
+        imb > 0.2 ? "pass" : "caution",
+        `Net ${(imb * 100).toFixed(0)}% by volume over ${flow.windowTrades} trades${imb < -0.2 ? " — sellers in control" : ""}`,
         "geckoterminal trades",
       ),
     );
