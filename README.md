@@ -7,10 +7,28 @@ rugged before, can I actually exit, and what does the flow look like right now.
 Every conclusion carries its source; anything the free data sources cannot answer
 is marked **unavailable** rather than estimated.
 
+## The call
+
+The first panel is a plain answer: **AVOID / HIGH RISK / SIZE DOWN / TRADEABLE /
+CLEANEST BUCKET**. It is not a score and not a prediction — it is 18 named gates
+evaluated against the thresholds public on-chain checklists actually use
+(top-10 ex-LP ≤15%, creator stake ≤3%, LP locked ≥90%, bundled supply <5%,
+buy/sell skew, exit depth, contract powers). Each gate shows the reading behind
+it and the source it came from, and the panel leads with **what would change the
+answer** — because that is the part that helps you think.
+
+Contract-level fails (honeypot, live mint, live freeze, punitive tax, deployer
+with prior rugs) force AVOID regardless of everything else. Liquidity fails mean
+*size*, not *fraud*, and are graded that way.
+
+Thresholds and their sources are documented in
+[MARKET_RESEARCH.md](MARKET_RESEARCH.md#9-decision-engine--ngưỡng-lấy-từ-đâu-vòng-3).
+
 ## What it answers
 
 | Question | How |
 |---|---|
+| **Should I buy this at all?** | 18 evidence gates → AVOID / HIGH RISK / SIZE DOWN / TRADEABLE, plus the conditions that would flip it |
 | Is the holder list real? | Concentration after removing LP/burn addresses **and** merging wallets that share a funder |
 | Has this dev done it before? | Deployer rap sheet: every prior token and whether it rugged |
 | Can I get out? | Constant-product exit math: max sell before 1/5/10% price impact, plus the largest holder's full exit |
