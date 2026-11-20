@@ -161,7 +161,11 @@ export async function computeClusters(input: ClusterInput): Promise<ClusterAnaly
     })
     .filter((g) => !g.isInfra)
     .sort((a, b) => b.pct - a.pct)
-    .map(({ isInfra: _isInfra, ...rest }) => rest);
+    .map((g) => {
+      const { isInfra: _drop, ...rest } = g;
+      void _drop;
+      return rest;
+    });
 
   // Effective top-10 after merging cluster groups into single entities.
   const clusterMap = new Map<string, string>();

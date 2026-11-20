@@ -318,6 +318,7 @@ export interface AnalysisResult {
   social: SocialAnalysis;
   risks: RiskSignal[];
   positives: PositiveSignal[];
+  decision: import("./analysis/decision").Decision;
   riskScore: number;
   verdict: Verdict;
   tldr: string[];

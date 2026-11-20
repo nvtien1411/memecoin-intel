@@ -10,10 +10,12 @@ import { ClusterMap } from "@/components/ClusterMap";
 import { FlowPanel } from "@/components/FlowPanel";
 import { DeployerPanel, SocialPanel } from "@/components/DeployerPanel";
 import { EntryPanel, ExitPanel } from "@/components/ExitPanel";
+import { DecisionPanel } from "@/components/DecisionPanel";
 import { ProvenancePanel, ReportPanel } from "@/components/ReportPanel";
 
 const SECTIONS = [
   { id: "sec-verdict", label: "verdict" },
+  { id: "sec-call", label: "buy?" },
   { id: "sec-risk", label: "risk" },
   { id: "sec-exit", label: "exit" },
   { id: "sec-holders", label: "holders" },
@@ -178,6 +180,10 @@ export default function Home() {
           <div className="space-y-5">
             <div id="sec-verdict" className="scroll-mt-32 border-b border-[#232a34] pb-5">
               <VerdictHeader data={data} />
+            </div>
+
+            <div id="sec-call" className="scroll-mt-32">
+              <DecisionPanel decision={data.decision} />
             </div>
 
             <nav className="sticky top-[104px] z-10 -mx-1 flex gap-1 overflow-x-auto border-b border-[#232a34] bg-[#07080a]/95 px-1 py-2 backdrop-blur">

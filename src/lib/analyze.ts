@@ -44,6 +44,7 @@ import { computeHolderAnalysis } from "./analysis/holders";
 import { computeClusters, clustersToMap } from "./analysis/clusters";
 import { computeFlow } from "./analysis/flow";
 import { computeExit, entryFromTrades } from "./analysis/exit";
+import { buildDecision } from "./analysis/decision";
 import { buildPositiveSignals, buildRiskSignals } from "./analysis/risk";
 import {
   DISCLAIMER,
@@ -183,13 +184,52 @@ async function resolveChain(address: string, explicit?: ChainId | null): Promise
   if (explicit) {
     const onChain = allPairs.filter((p) => chainByDexScreenerId(p.chainId) === explicit);
     const best = pickBestPair(onChain);
+    if (best) {
+      return {
+        chain: explicit,
+        pairs: onChain,
+        bestPair: best,
+        poolAddress: best.pairAddress,
+        dexId: best.dexId,
+        statuses,
+      };
+    }
+    // The chosen chain has no DexScreener pair. DexScreener does not index
+    // Robinhood, and a pool may exist there or on a chain the user mistyped —
+    // so probe GeckoTerminal for exactly the requested chain before giving up,
+    // and never fall through to a fabricated token on that chain.
+    const pools = await gtSearchPools(explicit, address);
+    statuses.push(pools.status);
+    const pool = bestGtPool(pools.data?.data);
+    if (pool) {
+      cacheSet(
+        `chain:${address.toLowerCase()}`,
+        {
+          chain: explicit,
+          poolAddress: poolAddress(pool),
+          dexId: pool.relationships?.dex?.data?.id ?? null,
+          gtPool: pool as unknown as GtPoolLike,
+        },
+        30 * 60_000,
+      );
+      return {
+        chain: explicit,
+        pairs: [],
+        bestPair: null,
+        poolAddress: poolAddress(pool),
+        dexId: pool.relationships?.dex?.data?.id ?? null,
+        statuses,
+        gtPool: pool as unknown as GtPoolLike,
+      };
+    }
     return {
       chain: explicit,
-      pairs: onChain,
-      bestPair: best,
-      poolAddress: best?.pairAddress ?? null,
-      dexId: best?.dexId ?? null,
+      pairs: [],
+      bestPair: null,
+      poolAddress: null,
+      dexId: null,
       statuses,
+      unresolved: true,
     };
   }
 
@@ -424,9 +464,9 @@ export async function analyzeToken(opts: AnalyzeOptions): Promise<AnalysisResult
   const poolForTrades = gtPool ? poolAddress(gtPool) : resolved.poolAddress;
   let trades: Trade[] = [];
   if (poolForTrades) {
-    const tradesRes = await gtTrades(chain, poolForTrades, 300);
+    const tradesRes = await gtTrades(chain, poolForTrades);
     provenance.push(tradesRes.status);
-    trades = tradesFromGt(tradesRes.data?.data, address);
+    trades = tradesFromGt(tradesRes.data?.data);
   }
 
   /* ---------------------------- ohlcv (24h) --------------------------- */
@@ -586,6 +626,16 @@ export async function analyzeToken(opts: AnalyzeOptions): Promise<AnalysisResult
   const riskInput = { token, market, security, holders, clusters, flow, deployer, exit: exitAnalysis };
   const risks = buildRiskSignals(riskInput);
   const positives = buildPositiveSignals(riskInput);
+  const decision = buildDecision({
+    token,
+    market,
+    security,
+    holders,
+    clusters,
+    flow,
+    deployer,
+    exit: exitAnalysis,
+  });
   const riskScore = scoreRisks(risks);
   const verdict = pickVerdict(riskScore, risks, positives);
 
@@ -606,6 +656,7 @@ export async function analyzeToken(opts: AnalyzeOptions): Promise<AnalysisResult
     },
     risks,
     positives,
+    decision,
     riskScore,
     verdict,
     tldr: [],

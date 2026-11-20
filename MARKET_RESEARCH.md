@@ -106,6 +106,43 @@ Hướng mới: **terminal thật** —
 - Section label dạng `// RISK` uppercase, nhỏ, xám.
 - Ưu tiên mật độ: trader muốn thấy nhiều số trên một màn.
 
+
+## 9. Decision engine — ngưỡng lấy từ đâu (vòng 3)
+
+Người dùng hỏi trực tiếp: "nên mua hay không". Đây là câu hỏi mà mọi checklist
+công khai đều trả lời bằng **ngưỡng số**, không phải bằng điểm tổng hợp. Nên
+module `analysis/decision.ts` dựng theo dạng **gate pass/caution/fail**, không
+phải một con số "điểm mua".
+
+| Gate | Pass | Caution | Fail | Nguồn |
+|---|---|---|---|---|
+| Top-10 ex-LP/burn (token <30 ngày) | ≤15% | 15–30% | >30% | r/CryptoHelp, r/defi |
+| Top-10 (token >30 ngày) | ≤40% | 40–65% | >65% | [suy luận] — ngưỡng mới hiệu chỉnh cho token trưởng thành |
+| Creator holdings | ≤3% | 3–10% | >10% | checklist cộng đồng |
+| LP locked/burned | ≥90% | 50–90% | <50% | memecoin.wiki |
+| Bundled supply (shared funder) | <5% | 5–20% | >20% | r/MemecoinSeason, crawl-hive |
+| Liquidity | ≥$50K | $10–50K | <$10K | [suy luận] từ exit math |
+| Exit trước 5% slippage | ≥$10K | $2–10K | <$2K | r/defi "exit before entry" |
+| Buy/sell imbalance | >+20% | ±20% | <−20% | [suy luận] |
+| Tax | <3% | 3–10% | ≥10% | goplus |
+
+**Quy tắc quan trọng nhất:** fail ở tầng contract (honeypot, mint, freeze, tax,
+deployer rug history) → `AVOID` bất kể các gate khác. Fail ở tầng thanh khoản →
+`HIGH RISK`, vì đó là câu chuyện position size, không phải câu chuyện "token lừa đảo".
+
+**Ba lỗi đã sửa khi test bằng token thật:**
+1. `liq`, `liq_cov`, `exit` cùng đo một thứ (độ sâu pool) → một token bị 3 fail
+   cho một vấn đề, luôn ra `AVOID`. Gộp thành một gate `exit`.
+2. Ngưỡng top-10 của token mới áp lên BONK (1.426 ngày, 2,1 triệu holder) →
+   báo fail 36%. Thực tế đó là custody, không phải bundle. Thêm band theo tuổi.
+3. Solana không có cơ chế honeypot (chỉ freeze authority) → mọi token Solana
+   hiện "honeypot unknown", kéo confidence xuống `low` vĩnh viễn. Bỏ gate này
+   khỏi chain Solana.
+
+**Giới hạn:** không có dữ liệu PnL ví, không có smart-money label, không có X.
+Nên engine không thể nói "smart money đang mua". Nó chỉ nói được token vi phạm
+quy tắc nào. Panel ghi rõ điều đó thay vì giả vờ.
+
 ## 8. Nguồn (đầy đủ link)
 
 - r/defi — What do you actually check before touching a token: https://www.reddit.com/r/defi/comments/1x0okrm/

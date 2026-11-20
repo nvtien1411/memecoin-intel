@@ -69,7 +69,7 @@ export function DeployerPanel({
                 {deployer.priorTokens.slice(0, 8).map((t) => (
                   <li
                     key={t.mint}
-                    className="flex items-center gap-2 rounded border border-[#232b36] bg-[#0b0e12] px-2 py-1.5"
+                    className="flex min-w-0 items-center gap-2 rounded border border-[#232b36] bg-[#0b0e12] px-2 py-1.5"
                   >
                     <a
                       href={explorerUrl(chain, t.mint)}

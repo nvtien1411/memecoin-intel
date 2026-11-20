@@ -64,15 +64,18 @@ export function ProvenancePanel({
         {provenance.map((p, i) => (
           <li
             key={`${p.source}-${i}`}
-            className="flex items-center gap-2 rounded border border-[#232b36] bg-[#0b0e12] px-2 py-1.5"
+            className="flex min-w-0 items-center gap-2 rounded border border-[#232b36] bg-[#0b0e12] px-2 py-1.5"
           >
             <span
               className={`h-1.5 w-1.5 shrink-0 rounded-full ${
                 p.ok ? "bg-emerald-400" : "bg-rose-400"
               }`}
             />
-            <span className="font-mono text-[13px] text-slate-300">{p.source}</span>
-            <span className="ml-auto font-mono text-[12px] text-slate-500">
+            <span className="truncate font-mono text-[13px] text-slate-300">{p.source}</span>
+            <span
+              className="ml-auto max-w-[55%] shrink-0 truncate text-right font-mono text-[12px] text-slate-500"
+              title={p.ok ? undefined : (p.error ?? "failed")}
+            >
               {p.ok ? `${p.ms}ms` : (p.error ?? "failed")}
             </span>
           </li>

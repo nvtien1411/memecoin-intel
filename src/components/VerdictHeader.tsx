@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { AnalysisResult } from "@/lib/types";
-import { VERDICT_META } from "@/lib/analysis/verdict";
+import { STANCE_META } from "@/lib/analysis/decision";
 import { fmtAge, fmtChange, fmtPrice, fmtUsd } from "@/lib/http";
 import { Stat } from "./ui";
 
@@ -27,7 +27,8 @@ function CopyAddr({ address }: { address: string }) {
 }
 
 export function VerdictHeader({ data }: { data: AnalysisResult }) {
-  const meta = VERDICT_META[data.verdict];
+  const call = data.decision;
+  const stance = STANCE_META[call.stance];
   const change = data.market.priceChange.h24 ?? null;
   const changeInfo = fmtChange(change, data.market.ageHours);
   const eff = data.holders.effectiveTop10Pct;
@@ -79,18 +80,21 @@ export function VerdictHeader({ data }: { data: AnalysisResult }) {
           </div>
         </div>
 
-        <div className={`shrink-0 rounded border px-4 py-2.5 ${meta.tone}`}>
-          <div className="text-[12.5px] font-bold uppercase tracking-[0.12em]">{meta.label}</div>
-          <div className="mt-1 flex items-baseline gap-1.5">
-            <span className="font-mono text-[18px] font-semibold leading-none">
-              {data.riskScore}
-            </span>
-            <span className="font-mono text-[11px] opacity-70">/ 100 risk</span>
+        <div className={`shrink-0 rounded border px-4 py-2.5 ${stance.tone}`}>
+          <div className="font-mono text-[9.5px] uppercase tracking-[0.14em] opacity-60">
+            our call
+          </div>
+          <div className="mt-0.5 text-[14px] font-bold uppercase leading-none tracking-[0.1em]">
+            {stance.label}
+          </div>
+          <div className="mt-1.5 flex items-baseline gap-1 font-mono text-[11px] opacity-70">
+            <span className="tabular-nums">{data.riskScore}</span>
+            <span>/100 risk score</span>
           </div>
         </div>
       </div>
 
-      <p className="max-w-3xl text-[13px] leading-relaxed text-slate-400">{meta.blurb}</p>
+      <p className="max-w-3xl text-[13px] leading-relaxed text-slate-400">{call.oneLiner}</p>
 
       <div className="grid grid-cols-2 gap-px border border-[#2b333e] bg-[#2b333e] sm:grid-cols-3 lg:grid-cols-6">
         <Stat

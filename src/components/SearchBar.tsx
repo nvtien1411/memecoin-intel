@@ -70,7 +70,7 @@ export function SearchBar({
             value={chain}
             onChange={(e) => setChain(e.target.value as ChainId | "auto")}
             aria-label="Chain"
-            className="rounded border border-[#2a323d] bg-[#0c1015] px-2.5 py-3 text-[12.5px] text-slate-300 outline-none transition hover:border-[#39434f] focus:border-sky-500/70"
+            className="min-h-[44px] rounded border border-[#2a323d] bg-[#0c1015] px-2.5 py-3 text-[12.5px] text-slate-300 outline-none transition hover:border-[#39434f] focus:border-sky-500/70"
           >
             {CHAINS.map((c) => (
               <option key={c.id} value={c.id}>
@@ -81,7 +81,7 @@ export function SearchBar({
           <button
             type="submit"
             disabled={loading || !valid}
-            className="rounded bg-sky-500 px-5 py-3 text-[13px] font-semibold text-[#04121c] transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-[#1c232c] disabled:text-slate-500"
+            className="min-h-[44px] flex-1 rounded bg-sky-500 px-5 py-3 text-[13px] font-semibold text-[#04121c] transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-[#1c232c] disabled:text-slate-500 sm:flex-none"
           >
             {loading ? "Analyzing…" : "Analyze"}
           </button>
@@ -101,7 +101,7 @@ export function SearchBar({
               onAnalyze(s.address, s.chain === "auto" ? null : s.chain);
             }}
             disabled={loading}
-            className="rounded border border-[#2a323d] bg-[#0c1015] px-2 py-0.5 font-mono text-[11.5px] text-slate-300 transition hover:border-sky-500/50 hover:text-sky-300 disabled:opacity-50"
+            className="min-h-[36px] rounded border border-[#2a323d] bg-[#0c1015] px-2 py-1 font-mono text-[11.5px] text-slate-300 transition hover:border-sky-500/50 hover:text-sky-300 disabled:opacity-50"
           >
             {s.label}
           </button>

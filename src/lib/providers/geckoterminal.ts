@@ -83,7 +83,7 @@ interface GtTrade {
   };
 }
 
-export async function gtTrades(chain: ChainId, pool: string, limit = 300) {
+export async function gtTrades(chain: ChainId, pool: string) {
   return fetchJson<{ data: GtTrade[] }>(
     "geckoterminal",
     `${BASE}/networks/${net(chain)}/pools/${pool}/trades`,
@@ -91,7 +91,7 @@ export async function gtTrades(chain: ChainId, pool: string, limit = 300) {
   );
 }
 
-export function tradesFromGt(raw: GtTrade[] | undefined, tokenAddress: string): Trade[] {
+export function tradesFromGt(raw: GtTrade[] | undefined): Trade[] {
   if (!raw) return [];
   const out: Trade[] = [];
   for (const t of raw) {

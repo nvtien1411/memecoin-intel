@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const address = (body?.address ?? "").trim();
+  const address = typeof body?.address === "string" ? body.address.trim() : "";
   const chainParam = (body?.chain ?? "").trim() as ChainId | "";
   const chain = VALID_CHAINS.includes(chainParam as ChainId) ? (chainParam as ChainId) : null;
 
