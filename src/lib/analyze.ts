@@ -116,6 +116,12 @@ export interface AnalyzeOptions {
    * the dashboard renders immediately.
    */
   skipClusters?: boolean;
+  /**
+   * Wall-clock ceiling for the whole pipeline, in milliseconds. Optional stages
+   * degrade when this runs out instead of letting the platform kill the
+   * function — a partial report beats a 504. Defaults to 45s.
+   */
+  budgetMs?: number;
 }
 
 interface Resolved {
@@ -336,6 +342,15 @@ async function resolveChain(address: string, explicit?: ChainId | null): Promise
 export async function analyzeToken(opts: AnalyzeOptions): Promise<AnalysisResult> {
   const address = opts.address.trim();
   const provenance: SourceStatus[] = [];
+
+  // Wall-clock ceiling for the whole pipeline. Individual providers each have
+  // their own timeout, but their sum is unbounded — slow RPC plus slow holder
+  // fetch plus retries can run past the host's function limit, and the user gets
+  // a 504 with no partial data instead of a report with honest gaps. Every
+  // optional stage checks this budget and degrades rather than continuing.
+  const deadline = Date.now() + (opts.budgetMs ?? 45_000);
+  const remainingMs = () => deadline - Date.now();
+  const outOfTime = () => remainingMs() < 1_500;
 
   const resolved = await resolveChain(address, opts.chain ?? null);
   provenance.push(...resolved.statuses);
@@ -580,7 +595,11 @@ export async function analyzeToken(opts: AnalyzeOptions): Promise<AnalysisResult
     ? emptyClusters(
         "Cluster trace is loading separately — it walks wallet history on-chain and takes longer than the rest of the report.",
       )
-    : traceBudget === null
+    : outOfTime()
+      ? emptyClusters(
+          "Funding trace skipped: ran out of the request's time budget before reaching this stage. Treat wallet relationships as unknown for this snapshot.",
+        )
+      : traceBudget === null
       ? emptyClusters(
           `Funding trace skipped: the pair is ${(ageH / 24).toFixed(0)} days old. Bundled-launch detection is only meaningful in the first week — a wallet funded four months ago says nothing about a launch bundle.`,
         )
@@ -590,7 +609,7 @@ export async function analyzeToken(opts: AnalyzeOptions): Promise<AnalysisResult
           knownAccounts,
           isSolana: chain === "solana",
           maxWallets: traceBudget.maxWallets,
-          budgetMs: traceBudget.budgetMs,
+          budgetMs: Math.min(traceBudget.budgetMs, remainingMs()),
         }).catch((err) =>
           // Cluster tracing is an enhancement. If the RPC rejects something,
           // degrade this one panel — never fail the whole analysis.
