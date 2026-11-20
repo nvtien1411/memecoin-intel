@@ -87,9 +87,8 @@ export function VerdictHeader({ data }: { data: AnalysisResult }) {
           <div className="mt-0.5 text-[14px] font-bold uppercase leading-none tracking-[0.1em]">
             {stance.label}
           </div>
-          <div className="mt-1.5 flex items-baseline gap-1 font-mono text-[11px] opacity-70">
-            <span className="tabular-nums">{data.riskScore}</span>
-            <span>/100 risk score</span>
+          <div className="mt-1.5 font-mono text-[11px] tabular-nums opacity-70">
+            {data.riskScore}/100 risk score
           </div>
         </div>
       </div>

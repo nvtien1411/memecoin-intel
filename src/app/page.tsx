@@ -191,10 +191,10 @@ export default function Home() {
                 <a
                   key={s.id}
                   href={`#${s.id}`}
-                  className={`shrink-0 rounded px-2.5 py-1 font-mono text-[11px] uppercase tracking-wide transition ${
+                  className={`shrink-0 border-b-2 px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wide transition ${
                     active === s.id
-                      ? "bg-sky-500/20 font-semibold text-sky-300 ring-1 ring-inset ring-sky-500/40"
-                      : "text-slate-500 hover:bg-white/5 hover:text-slate-300"
+                      ? "border-sky-400 bg-sky-500/15 font-semibold text-sky-200"
+                      : "border-transparent text-slate-500 hover:border-[#39434f] hover:bg-white/5 hover:text-slate-300"
                   }`}
                 >
                   {s.label}
