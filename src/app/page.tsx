@@ -75,7 +75,7 @@ export default function Home() {
   const [data, setData] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [active, setActive] = useState<string>("sec-verdict");
+  const [active, setActive] = useState<string>("sec-call");
   const [elapsed, setElapsed] = useState(0);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -105,9 +105,12 @@ export default function Home() {
 
   useEffect(() => () => { if (timer.current) clearInterval(timer.current); }, []);
 
-  // Highlight the section currently in view.
+  // Highlight the section currently in view. Only sections that actually exist
+  // as tabs are observed: `sec-verdict` sits above the nav and has no tab, so
+  // observing it left nothing highlighted at the top of the page.
   useEffect(() => {
     if (!data) return;
+    const tabs = SECTIONS.slice(1);
     const obs = new IntersectionObserver(
       (entries) => {
         const visible = entries
@@ -117,7 +120,7 @@ export default function Home() {
       },
       { rootMargin: "-72px 0px -60% 0px", threshold: 0 },
     );
-    for (const s of SECTIONS) {
+    for (const s of tabs) {
       const el = document.getElementById(s.id);
       if (el) obs.observe(el);
     }
