@@ -119,7 +119,7 @@ export interface AnalyzeOptions {
   /**
    * Wall-clock ceiling for the whole pipeline, in milliseconds. Optional stages
    * degrade when this runs out instead of letting the platform kill the
-   * function — a partial report beats a 504. Defaults to 45s.
+   * function — a partial report beats a 504. Defaults to 38s.
    */
   budgetMs?: number;
 }
@@ -348,7 +348,7 @@ export async function analyzeToken(opts: AnalyzeOptions): Promise<AnalysisResult
   // fetch plus retries can run past the host's function limit, and the user gets
   // a 504 with no partial data instead of a report with honest gaps. Every
   // optional stage checks this budget and degrades rather than continuing.
-  const deadline = Date.now() + (opts.budgetMs ?? 45_000);
+  const deadline = Date.now() + (opts.budgetMs ?? 38_000);
   const remainingMs = () => deadline - Date.now();
   const outOfTime = () => remainingMs() < 1_500;
 
@@ -478,16 +478,23 @@ export async function analyzeToken(opts: AnalyzeOptions): Promise<AnalysisResult
   /* ------------------------------ trades ------------------------------ */
   const poolForTrades = gtPool ? poolAddress(gtPool) : resolved.poolAddress;
   let trades: Trade[] = [];
-  if (poolForTrades) {
+  if (poolForTrades && !outOfTime()) {
     const tradesRes = await gtTrades(chain, poolForTrades);
     provenance.push(tradesRes.status);
     trades = tradesFromGt(tradesRes.data?.data);
+  } else if (poolForTrades) {
+    provenance.push({
+      source: "geckoterminal:trades",
+      ok: false,
+      ms: 0,
+      error: "skipped — request budget exhausted",
+    });
   }
 
   /* ---------------------------- ohlcv (24h) --------------------------- */
   // Only needed when DexScreener did not already give a 24h change — it costs
   // one more call against a 30 rpm budget.
-  if (poolForTrades && market.priceChange.h24 === undefined) {
+  if (poolForTrades && market.priceChange.h24 === undefined && !outOfTime()) {
     const ohlcvRes = await gtOhlcv(chain, poolForTrades, "hour", 1, 25);
     provenance.push(ohlcvRes.status);
     const rows = ohlcvFromGt(ohlcvRes.data?.data?.attributes?.ohlcv_list);
@@ -535,7 +542,18 @@ export async function analyzeToken(opts: AnalyzeOptions): Promise<AnalysisResult
     }
   }
 
-  const gp = await gpTokenSecurity(chain, address);
+  const gp = outOfTime()
+    ? {
+        ok: false,
+        data: null,
+        status: {
+          source: "goplus",
+          ok: false,
+          ms: 0,
+          error: "skipped — request budget exhausted",
+        },
+      }
+    : await gpTokenSecurity(chain, address);
   provenance.push(gp.status);
   const gpTok = pickGpToken(gp.data, address);
   if (gpTok) {
